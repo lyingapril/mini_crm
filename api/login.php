@@ -1,8 +1,7 @@
 <?php
 // 引入核心类和配置（注意路径：根据你的目录结构调整）
-require_once __DIR__ . '/../config/db_config.php';
-require_once __DIR__ . '/../core/Database.php';
 
+require_once __DIR__ . '/../core/Database.php';
 // 设置响应头（跨域+JSON格式）
 header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Origin: *");

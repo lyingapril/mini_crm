@@ -1,5 +1,4 @@
 <?php
-require_once __DIR__ . '/../config/db_config.php';
 require_once __DIR__ . '/../core/Database.php';
 require_once __DIR__ . '/../utils/EncryptUtil.php';
 
@@ -23,7 +22,7 @@ if ($createdBy <= 0) {
 $db = new Database();
 
 // 构建查询条件（动态拼接，安全可控）
-$sql = "SELECT id, name, company, status, created_at FROM customers WHERE created_by = ?";
+$sql = "SELECT id, name, phone, email, company, status, created_at FROM customers WHERE created_by = ?";
 $params = [$createdBy];
 $types = "i";
 

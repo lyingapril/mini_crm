@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AES-128-CBC 加解密工具（密钥：mini_crm_keys_25）</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Microsoft Yahei", sans-serif;
+    }
+
+    body {
+      background-color: #f5f7fa;
+      padding: 30px 0;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 700px;
+      margin: 0 auto;
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      padding: 30px;
+    }
+
+    .title {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 30px;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .form-card {
+      margin-bottom: 25px;
+      padding: 20px;
+      border: 1px solid #eef1f5;
+      border-radius: 8px;
+      background-color: #fafbfc;
+    }
+
+    .card-title {
+      color: #34495e;
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #eef1f5;
+    }
+
+    .form-item {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      color: #596978;
+      font-size: 14px;
+      margin-bottom: 6px;
+      font-weight: 400;
+    }
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #dce1e8;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #2c3e50;
+      transition: border-color 0.2s ease;
+      background-color: #fff;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background-color: #3498db;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background-color: #2980b9;
+    }
+
+    .btn-reset {
+      background-color: #95a5a6;
+      color: #fff;
+    }
+
+    .btn-reset:hover {
+      background-color: #7f8c8d;
+    }
+
+    .result-area {
+      margin-top: 30px;
+      padding: 20px;
+      border: 1px solid #eef1f5;
+      border-radius: 8px;
+      background-color: #fff;
+    }
+
+    .result-title {
+      color: #34495e;
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .result-content {
+      padding: 15px;
+      border-radius: 6px;
+      background-color: #fafbfc;
+      min-height: 80px;
+      font-size: 14px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .success {
+      color: #27ae60;
+      border: 1px solid #d5f5e3;
+    }
+
+    .error {
+      color: #e74c3c;
+      border: 1px solid #fadbd8;
+    }
+
+    .default {
+      color: #7f8c8d;
+      border: 1px solid #eef1f5;
+    }
+
+    .tips {
+      font-size: 12px;
+      color: #95a5a6;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    .key-tips, .iv-tips {
+      color: #e74c3c;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="title">AES-128-CBC 加解密工具（密钥：mini_crm_keys_25）</h1>
+
+    <!-- 基础配置（密钥+IV） -->
+    <div class="form-card">
+      <div class="card-title">基础配置（与 PHP 保持一致）</div>
+      <div class="form-item">
+        <label for="aesKey">AES 密钥 <span class="key-tips">（必须16字节，当前：mini_crm_keys_25）</span></label>
+        <input type="text" id="aesKey" value="mini_crm_keys_25" placeholder="请输入16字节密钥">
+        <div class="tips">当前密钥：mini_crm_keys_25（16字节，符合 AES-128 要求）</div>
+      </div>
+      <div class="form-item">
+        <label for="aesIv">CBC 初始化向量（IV） <span class="iv-tips">（必须16字节，前后端一致）</span></label>
+        <input type="text" id="aesIv" value="1234567890abcdef" placeholder="请输入16字节IV">
+        <div class="tips">IV 用于 CBC 模式加密，必须16字节，前后端需完全一致（当前默认：1234567890abcdef）</div>
+      </div>
+    </div>
+
+    <!-- 加密功能区 -->
+    <div class="form-card">
+      <div class="card-title">加密功能（明文 → Base64 密文）</div>
+      <div class="form-item">
+        <label for="plaintextInput">待加密明文</label>
+        <textarea id="plaintextInput" placeholder="请输入需要加密的内容，例如：13800138000">13800138000</textarea>
+      </div>
+      <div class="btn-group">
+        <button id="encryptBtn" class="btn-primary">执行加密</button>
+        <button id="resetEncryptBtn" class="btn-reset">清空</button>
+      </div>
+    </div>
+
+    <!-- 解密功能区 -->
+    <div class="form-card">
+      <div class="card-title">解密功能（Base64 密文 → 明文）</div>
+      <div class="form-item">
+        <label for="ciphertextInput">待解密密文（Base64 格式）</label>
+        <textarea id="ciphertextInput" placeholder="请粘贴 PHP 生成的 Base64 密文"></textarea>
+      </div>
+      <div class="btn-group">
+        <button id="decryptBtn" class="btn-primary">执行解密</button>
+        <button id="resetDecryptBtn" class="btn-reset">清空</button>
+      </div>
+    </div>
+
+    <!-- 结果展示区 -->
+    <div class="result-area">
+      <div class="result-title">操作结果</div>
+      <div id="resultContent" class="result-content default">
+        请先输入内容，执行加密或解密操作查看结果
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * AES 加解密工具（AES-128-CBC，兼容 Chrome，密钥：mini_crm_keys_25）
+     */
+    const AesCryptoTool = {
+      // 默认配置
+      defaultConfig: {
+        key: "mini_crm_keys_25", // 16字节密钥
+        iv: "1234567890abcdef",  // 16字节IV（与PHP一致）
+        algorithm: "AES-CBC",     // CBC模式（Web Crypto支持）
+        keyLength: 128            // 128位密钥
+      },
+
+      /**
+       * AES-128-CBC 加密
+       * @param {string} plaintext - 明文
+       * @param {Object} [customConfig] - 自定义配置
+       * @returns {Promise<string>} Base64密文
+       */
+      encrypt: async function(plaintext, customConfig = {}) {
+        const config = { ...this.defaultConfig, ...customConfig };
+        const { key, iv, algorithm, keyLength } = config;
+
+        try {
+          // 基础校验
+          this._validateParams(plaintext, key, iv, "encrypt");
+
+          // 转换为二进制格式
+          const plaintextUint8 = new TextEncoder().encode(plaintext);
+          const keyUint8 = new TextEncoder().encode(key);
+          const ivUint8 = new TextEncoder().encode(iv);
+
+          // 导入密钥
+          const cryptoKey = await this._importCryptoKey(keyUint8, algorithm, keyLength, ["encrypt"]);
+
+          // 执行加密（返回ArrayBuffer）
+          const encryptedBuffer = await crypto.subtle.encrypt(
+            { name: algorithm, iv: ivUint8 }, // CBC模式必须传入IV
+            cryptoKey,
+            plaintextUint8
+          );
+
+          // 关键修正：将ArrayBuffer转为Uint8Array后再转Base64
+          const encryptedUint8 = new Uint8Array(encryptedBuffer);
+          const ciphertextBase64 = this._uint8ToBase64(encryptedUint8);
+          console.log(`[AesCryptoTool] 加密成功：明文「${plaintext}」→ 密文「${ciphertextBase64}」`);
+          return ciphertextBase64;
+        } catch (err) {
+          console.error("[AesCryptoTool] 加密失败：", err.message);
+          return "";
+        }
+      },
+
+      /**
+       * AES-128-CBC 解密
+       * @param {string} ciphertextBase64 - Base64密文
+       * @param {Object} [customConfig] - 自定义配置
+       * @returns {Promise<string>} 明文
+       */
+      decrypt: async function(ciphertextBase64, customConfig = {}) {
+        const config = { ...this.defaultConfig, ...customConfig };
+        const { key, iv, algorithm, keyLength } = config;
+
+        try {
+          // 基础校验
+          this._validateParams(ciphertextBase64, key, iv, "decrypt");
+
+          // 清理密文
+          const cleanCiphertext = ciphertextBase64.replace(/\s+/g, "").trim();
+
+          // Base64 → Uint8Array
+          const encryptedUint8 = this._base64ToUint8(cleanCiphertext);
+          const keyUint8 = new TextEncoder().encode(key);
+          const ivUint8 = new TextEncoder().encode(iv);
+
+          // 导入密钥
+          const cryptoKey = await this._importCryptoKey(keyUint8, algorithm, keyLength, ["decrypt"]);
+
+          // 执行解密（返回ArrayBuffer）
+          const decryptedBuffer = await crypto.subtle.decrypt(
+            { name: algorithm, iv: ivUint8 },
+            cryptoKey,
+            encryptedUint8
+          );
+
+          // 关键修正：将ArrayBuffer转为Uint8Array后再转明文
+          const decryptedUint8 = new Uint8Array(decryptedBuffer);
+          const plaintext = new TextDecoder("utf-8").decode(decryptedUint8);
+          console.log(`[AesCryptoTool] 解密成功：密文「${cleanCiphertext}」→ 明文「${plaintext}」`);
+          return plaintext;
+        } catch (err) {
+          console.error("[AesCryptoTool] 解密失败：", err.message);
+          return "";
+        }
+      },
+
+      /**
+       * 参数校验（新增IV校验）
+       * @param {string} data - 明文/密文
+       * @param {string} key - 密钥
+       * @param {string} iv - IV向量
+       * @param {string} type - 操作类型
+       * @private
+       */
+      _validateParams: function(data, key, iv, type) {
+        const dataName = type === "encrypt" ? "明文" : "密文";
+
+        if (typeof data !== "string" || !data.trim()) {
+          throw new Error(`${dataName}为空或非字符串类型`);
+        }
+        if (key.length !== 16) {
+          throw new Error(`密钥长度错误，期望16字节，实际${key.length}字节`);
+        }
+        if (iv.length !== 16) {
+          throw new Error(`IV长度错误，期望16字节，实际${iv.length}字节`);
+        }
+      },
+
+      /**
+       * 导入密钥
+       * @private
+       */
+      _importCryptoKey: async function(keyUint8, algorithm, keyLength, usages) {
+        return await crypto.subtle.importKey(
+          "raw",
+          keyUint8,
+          { name: algorithm, length: keyLength },
+          false,
+          usages
+        );
+      },
+
+      /**
+       * Uint8Array → Base64（兼容所有浏览器）
+       * @private
+       */
+      _uint8ToBase64: function(uint8Arr) {
+        let binary = '';
+        const len = uint8Arr.byteLength;
+        for (let i = 0; i < len; i++) {
+          binary += String.fromCharCode(uint8Arr[i]);
+        }
+        return btoa(binary);
+      },
+
+      /**
+       * Base64 → Uint8Array（兼容所有浏览器）
+       * @private
+       */
+      _base64ToUint8: function(base64Str) {
+        const binary = atob(base64Str);
+        const len = binary.length;
+        const uint8Arr = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+          uint8Arr[i] = binary.charCodeAt(i);
+        }
+        return uint8Arr;
+      },
+
+      /**
+       * 更新默认配置
+       */
+      updateDefaultConfig: function(newConfig) {
+        this.defaultConfig = { ...this.defaultConfig, ...newConfig };
+        console.log("[AesCryptoTool] 配置已更新：", this.defaultConfig);
+      }
+    };
+
+    // -------------------------- 页面交互 --------------------------
+    const aesKeyInput = document.getElementById("aesKey");
+    const aesIvInput = document.getElementById("aesIv");
+    const plaintextInput = document.getElementById("plaintextInput");
+    const ciphertextInput = document.getElementById("ciphertextInput");
+    const encryptBtn = document.getElementById("encryptBtn");
+    const decryptBtn = document.getElementById("decryptBtn");
+    const resetEncryptBtn = document.getElementById("resetEncryptBtn");
+    const resetDecryptBtn = document.getElementById("resetDecryptBtn");
+    const resultContent = document.getElementById("resultContent");
+
+    // 重置结果样式
+    const resetResultStyle = () => {
+      resultContent.className = "result-content default";
+      resultContent.textContent = "请先输入内容，执行加密或解密操作查看结果";
+    };
+
+    // 获取当前配置
+    const getCurrentConfig = () => {
+      return {
+        key: aesKeyInput.value.trim(),
+        iv: aesIvInput.value.trim()
+      };
+    };
+
+    // 加密按钮点击
+    encryptBtn.addEventListener("click", async () => {
+      const plaintext = plaintextInput.value.trim();
+      const config = getCurrentConfig();
+
+      resultContent.className = "result-content default";
+      resultContent.textContent = "正在加密...";
+
+      const ciphertext = await AesCryptoTool.encrypt(plaintext, config);
+      if (ciphertext) {
+        resultContent.className = "result-content success";
+        resultContent.textContent = `加密成功！\nBase64 密文：\n${ciphertext}`;
+        ciphertextInput.value = ciphertext; // 自动填充
+      } else {
+        resultContent.className = "result-content error";
+        resultContent.textContent = "加密失败！查看控制台日志获取详情";
+      }
+    });
+
+    // 解密按钮点击
+    decryptBtn.addEventListener("click", async () => {
+      const ciphertext = ciphertextInput.value.trim();
+      const config = getCurrentConfig();
+
+      resultContent.className = "result-content default";
+      resultContent.textContent = "正在解密...";
+
+      const plaintext = await AesCryptoTool.decrypt(ciphertext, config);
+      if (plaintext) {
+        resultContent.className = "result-content success";
+        resultContent.textContent = `解密成功！\n明文：\n${plaintext}`;
+      } else {
+        resultContent.className = "result-content error";
+        resultContent.textContent = "解密失败！查看控制台日志获取详情";
+      }
+    });
+
+    // 清空按钮
+    resetEncryptBtn.addEventListener("click", () => {
+      plaintextInput.value = "";
+      resetResultStyle();
+    });
+    resetDecryptBtn.addEventListener("click", () => {
+      ciphertextInput.value = "";
+      resetResultStyle();
+    });
+
+    // 页面加载完成
+    window.addEventListener("load", () => {
+      console.log("AES-128-CBC 加解密工具加载完成，可开始测试");
+      resetResultStyle();
+    });
+  </script>
+</body>
+</html>
