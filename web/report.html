@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>客户报表 - CRM迷你版</title>
+  <style>
+    .header { padding: 15px; background: #f5f5f5; }
+    .container { padding: 20px; display: flex; gap: 20px; }
+    .chart-box { flex: 1; border: 1px solid #eee; padding: 20px; border-radius: 8px; }
+  </style>
+  <!-- 引入ECharts（可视化库，不用自己写图表） -->
+  <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+</head>
+<body>
+  <div class="header">
+    <h1>客户数据报表</h1>
+    <a href="index.html" style="text-decoration: none; color: #007bff;">返回客户列表</a>
+  </div>
+
+  <div class="container">
+    <div class="chart-box">
+      <h3>客户状态分布</h3>
+      <div id="statusChart" style="width: 100%; height: 300px;"></div>
+    </div>
+    <div class="chart-box">
+      <h3>近30天新增客户</h3>
+      <div id="newCustomerChart" style="width: 100%; height: 300px;"></div>
+    </div>
+  </div>
+
+  <script>
+    window.onload = function() {
+      if (!localStorage.getItem("user")) window.location.href = "login.html";
+      getReportData();
+    };
+
+    function getReportData() {
+      fetch("../api/report.php")
+        .then(res => res.json())
+        .then(data => {
+          // 渲染状态分布饼图
+          const statusChart = echarts.init(document.getElementById("statusChart"));
+          statusChart.setOption({
+            tooltip: { trigger: 'item' },
+            series: [{
+              name: '客户状态',
+              type: 'pie',
+              radius: ['40%', '70%'],
+              data: data.data.statusDistribution.map(item => ({
+                name: item.status === 'active' ? '活跃客户' : '非活跃客户',
+                value: item.count
+              }))
+            }]
+          });
+
+          // 渲染近30天新增客户折线图
+          const newChart = echarts.init(document.getElementById("newCustomerChart"));
+          newChart.setOption({
+            tooltip: { trigger: 'axis' },
+            xAxis: {
+              type: 'category',
+              data: data.data.newCustomerIn30Days.map(item => item.date)
+            },
+            yAxis: { type: 'value' },
+            series: [{
+              name: '新增客户数',
+              type: 'line',
+              data: data.data.newCustomerIn30Days.map(item => item.count)
+            }]
+          });
+        });
+    }
+  </script>
+</body>
+</html>
