@@ -1,0 +1,1 @@
+To comply with privacy requirements, sensitive data such as customer phone numbers and email addresses are encrypted and stored using AES-128 in the demo. They are decrypted and displayed when queried, thus preventing the leakage of sensitive information and conforming to the core principles of New Zealand's data privacy protection.
